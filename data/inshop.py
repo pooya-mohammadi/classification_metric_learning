@@ -2,7 +2,7 @@ import csv
 import os.path
 import random
 
-from dataset import Dataset
+from data.dataset import Dataset
 
 
 class InShop(Dataset):
@@ -10,10 +10,10 @@ class InShop(Dataset):
         self.query = query
         self.split_file = "list_eval_partition.txt"
         super(InShop, self).__init__(root, train, transform)
-        print "Loaded {} samples for dataset {},  {} classes, {} instances".format(len(self),
+        print("Loaded {} samples for dataset {},  {} classes, {} instances".format(len(self),
                                                                                    self.name,
                                                                                    self.num_cls,
-                                                                                   self.num_instance)
+                                                                                   self.num_instance))
     @property
     def name(self):
         return 'inshop_{}_{}'.format('train' if self.train else 'test',
@@ -71,22 +71,22 @@ if __name__ == '__main__':
     for i in random.sample(range(0,len(inshop_train_set)), 5):
         image_id, class_id, instance_id, idx = inshop_train_set[i]
         assert idx == i
-        print "Image  {} has class label {}, instance label {}".format(inshop_train_set.image_paths[i],
+        print ("Image  {} has class label {}, instance label {}".format(inshop_train_set.image_paths[i],
                                                                        instance_id,
-                                                                       class_id)
+                                                                       class_id))
 
     inshop_query_set = InShop('/data1/data/inshop', train=False, query=True)
     for i in random.sample(range(0,len(inshop_query_set)), 5):
         image_id, class_id, instance_id, idx = inshop_query_set[i]
         assert idx == i
-        print "Image  {} has class label {}, instance label {}".format(inshop_query_set.image_paths[i],
+        print ("Image  {} has class label {}, instance label {}".format(inshop_query_set.image_paths[i],
                                                                        instance_id,
-                                                                       class_id)
+                                                                       class_id))
 
     inshop_index_set = InShop('/data1/data/inshop', train=False, query=False)
     for i in random.sample(range(0,len(inshop_index_set)), 5):
         image_id, class_id, instance_id, idx = inshop_index_set[i]
         assert idx == i
-        print "Image  {} has class label {}, instance label {}".format(inshop_index_set.image_paths[i],
+        print ("Image  {} has class label {}, instance label {}".format(inshop_index_set.image_paths[i],
                                                                        instance_id,
-                                                                       class_id)
+                                                                       class_id))

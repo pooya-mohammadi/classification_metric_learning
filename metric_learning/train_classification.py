@@ -14,9 +14,9 @@ from torch.utils.data.dataloader import default_collate
 from torchvision import transforms
 
 from data.inshop import InShop
-from data.stanford_products import StanfordOnlineProducts
-from data.cars196 import Cars196
-from data.cub200 import Cub200
+# from data.stanford_products import StanfordOnlineProducts
+# from data.cars196 import Cars196
+# from data.cub200 import Cub200
 from metric_learning.util import SimpleLogger
 from metric_learning.sampler import ClassBalancedBatchSampler
 
@@ -50,7 +50,7 @@ def parse_args():
     parser.add_argument("--epochs_per_step", type=int, default=4, help="Epochs for learning rate step")
     parser.add_argument("--pretrain_epochs", type=int, default=1, help="Epochs for pretraining")
     parser.add_argument("--num_steps", type=int, default=3, help="Num steps to take")
-    parser.add_argument("--output", type=str, default="/data1/output", help="The output folder for training")
+    parser.add_argument("--output", type=str, default="../data1/output", help="The output folder for training")
 
     return parser.parse_args()
 
@@ -113,9 +113,9 @@ def main():
         train_dataset = Cub200('/data1/data/cub200/CUB_200_2011', transform=train_transform)
         eval_dataset = Cub200('/data1/data/cub200/CUB_200_2011', train=False, transform=eval_transform)
     elif args.dataset == "InShop":
-        train_dataset = InShop('/data1/data/inshop', transform=train_transform)
-        query_dataset = InShop('/data1/data/inshop', train=False, query=True, transform=eval_transform)
-        index_dataset = InShop('/data1/data/inshop', train=False, query=False, transform=eval_transform)
+        train_dataset = InShop('../data1/data/inshop', transform=train_transform)
+        query_dataset = InShop('../data1/data/inshop', train=False, query=True, transform=eval_transform)
+        index_dataset = InShop('../data1/data/inshop', train=False, query=False, transform=eval_transform)
     else:
         print("Dataset {} is not supported yet... Abort".format(args.dataset))
         return

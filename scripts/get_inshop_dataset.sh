@@ -3,7 +3,7 @@
 # Get the In-Shop dataset
 #
 
-DATA_DIR=/data1/data/inshop
+DATA_DIR=../data1/data/inshop
 
 if [[ ! -d "${DATA_DIR}" ]]; then
   echo "${DATA_DIR} doesn't exist, will create one.";

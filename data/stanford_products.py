@@ -9,10 +9,10 @@ class StanfordOnlineProducts(Dataset):
     def __init__(self, root, train=True, transform=None):
         self.info_file = 'Ebay_{}.txt'.format('train' if train else 'test')
         super(StanfordOnlineProducts, self).__init__(root, train, transform)
-        print "Loaded {} samples for dataset {},  {} classes, {} instances".format(len(self),
+        print ("Loaded {} samples for dataset {},  {} classes, {} instances".format(len(self),
                                                                                    self.name,
                                                                                    self.num_cls,
-                                                                                   self.num_instance)
+                                                                                   self.num_instance))
 
     @property
     def name(self):
