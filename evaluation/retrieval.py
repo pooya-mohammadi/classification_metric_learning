@@ -89,7 +89,7 @@ def evaluate_recall_at_k(dists, results, query_labels, db_labels, k):
 
     recall_at_k = np.zeros((k,))
 
-    for i in xrange(len(query_labels)):
+    for i in range(len(query_labels)):
         pos = 0 # keep track recall at pos
         j = 0 # looping through results
         while pos < k:
