@@ -5,12 +5,12 @@ import random
 from data.dataset import Dataset
 
 
-class InShop(Dataset):
+class Symo(Dataset):
     def __init__(self, root, train=True, query=True, transform=None, return_path=False):
         self.return_path = return_path
         self.query = query
         self.split_file = "list_eval_partition.txt"
-        super(InShop, self).__init__(root, train, transform)
+        super().__init__(root, train, transform)
         print("Loaded {} samples for dataset {},  {} classes, {} instances".format(len(self),
                                                                                    self.name,
                                                                                    self.num_cls,

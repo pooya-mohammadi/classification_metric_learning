@@ -1,6 +1,7 @@
 from abc import ABCMeta, abstractmethod, abstractproperty
 from PIL import Image
 
+
 class Dataset(object):
     """
     This abstract class defines the interface needed for dataset loading
@@ -30,10 +31,10 @@ class Dataset(object):
         self._load()
 
         # Check dataset is loaded properly
-        assert(len(self.image_paths) != 0)
-        assert(len(self.instance_map) != 0)
-        assert(len(self.image_paths) == len(self.instance_labels))
-        assert(len(self.image_paths) == len(self.class_labels))
+        assert (len(self.image_paths) != 0)
+        assert (len(self.instance_map) != 0)
+        assert (len(self.image_paths) == len(self.instance_labels))
+        assert (len(self.image_paths) == len(self.class_labels))
 
     @abstractproperty
     def name(self):

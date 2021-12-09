@@ -14,9 +14,7 @@ from torch.utils.data.dataloader import default_collate
 from torchvision import transforms
 
 from data.inshop import InShop
-# from data.stanford_products import StanfordOnlineProducts
-# from data.cars196 import Cars196
-# from data.cub200 import Cub200
+from data.symo import Symo
 from metric_learning.util import SimpleLogger
 from metric_learning.sampler import ClassBalancedBatchSampler
 
@@ -71,8 +69,7 @@ def main():
 
     output_directory = os.path.join(args.output, args.dataset, str(args.dim),
                                     '_'.join([args.model_name, str(args.batch_size)]))
-    if not os.path.exists(output_directory):
-        os.makedirs(output_directory)
+    os.makedirs(output_directory, exist_ok=True)
     out_log = os.path.join(output_directory, "train.log")
     sys.stdout = SimpleLogger(out_log, sys.stdout)
 
@@ -98,24 +95,14 @@ def main():
         ToRange255(max(model.input_range) == 255),
         transforms.Normalize(mean=model.mean, std=model.std)
     ])
-
-    # Setup dataset
-    if args.dataset == 'StanfordOnlineProducts':
-        train_dataset = StanfordOnlineProducts('/data1/data/stanford_products/Stanford_Online_Products',
-                                               transform=train_transform)
-        eval_dataset = StanfordOnlineProducts('/data1/data/stanford_products/Stanford_Online_Products',
-                                              train=False,
-                                              transform=eval_transform)
-    elif args.dataset == 'Cars196':
-        train_dataset = Cars196('/data1/data/cars196', transform=train_transform)
-        eval_dataset = Cars196('/data1/data/cars196', train=False, transform=eval_transform)
-    elif args.dataset == 'Cub200':
-        train_dataset = Cub200('/data1/data/cub200/CUB_200_2011', transform=train_transform)
-        eval_dataset = Cub200('/data1/data/cub200/CUB_200_2011', train=False, transform=eval_transform)
-    elif args.dataset == "InShop":
+    if args.dataset == "InShop":
         train_dataset = InShop('../data1/data/inshop', transform=train_transform)
         query_dataset = InShop('../data1/data/inshop', train=False, query=True, transform=eval_transform)
         index_dataset = InShop('../data1/data/inshop', train=False, query=False, transform=eval_transform)
+    elif args.dataset == 'symo':
+        train_dataset = Symo('../data1/data/symo', transform=train_transform)
+        query_dataset = Symo('../data1/data/symo', train=False, query=True, transform=eval_transform)
+        index_dataset = Symo('../data1/data/symo', train=False, query=False, transform=eval_transform)
     else:
         print("Dataset {} is not supported yet... Abort".format(args.dataset))
         return
@@ -136,26 +123,18 @@ def main():
                                   pin_memory=True,
                                   num_workers=4)
 
-    if args.dataset != "InShop":
-        eval_loader = DataLoader(eval_dataset,
-                                 batch_size=args.batch_size,
-                                 drop_last=False,
-                                 shuffle=False,
-                                 pin_memory=True,
-                                 num_workers=4)
-    else:
-        query_loader = DataLoader(query_dataset,
-                                  batch_size=args.batch_size,
-                                  drop_last=False,
-                                  shuffle=False,
-                                  pin_memory=True,
-                                  num_workers=4)
-        index_loader = DataLoader(index_dataset,
-                                  batch_size=args.batch_size,
-                                  drop_last=False,
-                                  shuffle=False,
-                                  pin_memory=True,
-                                  num_workers=4)
+    query_loader = DataLoader(query_dataset,
+                              batch_size=args.batch_size,
+                              drop_last=False,
+                              shuffle=False,
+                              pin_memory=True,
+                              num_workers=4)
+    index_loader = DataLoader(index_dataset,
+                              batch_size=args.batch_size,
+                              drop_last=False,
+                              shuffle=False,
+                              pin_memory=True,
+                              num_workers=4)
 
     # Setup loss function
     loss_fn = losses.NormSoftmaxLoss(args.dim, train_dataset.num_instance)
@@ -198,14 +177,10 @@ def main():
                     forward - data, back - forward, end - back, end - forward))
 
         eval_file = os.path.join(output_directory, 'epoch_{}'.format(args.pretrain_epochs - epoch))
-        if args.dataset != "InShop":
-            embeddings, labels = extract_feature(model, eval_loader, gpu_device)
-            evaluate_float_binary_embedding_faiss(embeddings, embeddings, labels, labels, eval_file, k=1000, gpu_id=0)
-        else:
-            query_embeddings, query_labels = extract_feature(model, query_loader, gpu_device)
-            index_embeddings, index_labels = extract_feature(model, index_loader, gpu_device)
-            evaluate_float_binary_embedding_faiss(query_embeddings, index_embeddings, query_labels, index_labels, eval_file,
-                                                  k=1000, gpu_id=0)
+        query_embeddings, query_labels = extract_feature(model, query_loader, gpu_device)
+        index_embeddings, index_labels = extract_feature(model, index_loader, gpu_device)
+        evaluate_float_binary_embedding_faiss(query_embeddings, index_embeddings, query_labels, index_labels,
+                                              eval_file, k=1000, gpu_id=0)
 
     # Full end-to-end finetune of all parameters
     opt = torch.optim.SGD(chain(model.parameters(), loss_fn.parameters()), lr=args.lr, momentum=0.9, weight_decay=1e-4)
@@ -243,15 +218,12 @@ def main():
 
         if (epoch + 1) % args.test_every_n_epochs == 0:
             eval_file = os.path.join(output_directory, 'epoch_{}'.format(epoch + 1))
-            if args.dataset != "InShop":
-                embeddings, labels = extract_feature(model, eval_loader, gpu_device)
-                evaluate_float_binary_embedding_faiss(embeddings, embeddings, labels, labels, eval_file, k=1000, gpu_id=0)
-            else:
-                query_embeddings, query_labels = extract_feature(model, query_loader, gpu_device)
-                index_embeddings, index_labels = extract_feature(model, index_loader, gpu_device)
-                evaluate_float_binary_embedding_faiss(query_embeddings, index_embeddings, query_labels, index_labels,
-                                                      eval_file,
-                                                      k=1000, gpu_id=0)
+            query_embeddings, query_labels = extract_feature(model, query_loader, gpu_device)
+            index_embeddings, index_labels = extract_feature(model, index_loader, gpu_device)
+            evaluate_float_binary_embedding_faiss(query_embeddings, index_embeddings, query_labels, index_labels,
+                                                  eval_file,
+                                                  k=1000, gpu_id=0)
+
 
 if __name__ == '__main__':
     main()
