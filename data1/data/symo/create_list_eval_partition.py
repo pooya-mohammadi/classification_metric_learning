@@ -3,7 +3,7 @@ import shutil
 from os.path import join
 import random
 
-train_prob = 0.5
+train_prob = 0.8
 query_prob = 0.5
 
 main_dir = 'img'
@@ -21,8 +21,8 @@ for main_category in os.listdir(main_dir):
                 if " " in img_name:
                     new_img_name = img_name.replace(" ", "")
                     new_img_path = join(sub_category_path, new_img_name)
-                    img_path = new_img_path
                     shutil.move(img_path, new_img_path)
+                    img_path = new_img_path
                     print(f'[INFO] rename {img_path} to {new_img_path}')
 
                 record = f'{img_path}                      {sub_category_path} train\n'
