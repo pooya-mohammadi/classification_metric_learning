@@ -2,6 +2,7 @@ import os
 import shutil
 from os.path import join
 import random
+from PIL import Image
 
 train_prob = 0.8
 query_prob = 0.5
@@ -24,6 +25,11 @@ for main_category in os.listdir(main_dir):
                     shutil.move(img_path, new_img_path)
                     img_path = new_img_path
                     print(f'[INFO] rename {img_path} to {new_img_path}')
+                try:
+                    Image.open(img_path).convert('RGB')
+                except OSError:
+                    print(f'[INFO] truncation error for {img_path}, skipping')
+                    continue
 
                 record = f'{img_path}                      {sub_category_path} train\n'
                 txt_file.write(record)
@@ -41,4 +47,9 @@ for main_category in os.listdir(main_dir):
                 else:
                     record = f'{img_path}                      {sub_category_path} gallery\n'
                 txt_file.write(record)
+                try:
+                    Image.open(img_path).convert('RGB')
+                except OSError:
+                    print(f'[INFO] truncation error for image {img_path}, skipping')
+                    continue
 print('[INFO] It is done!')
